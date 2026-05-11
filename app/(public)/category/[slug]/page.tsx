@@ -50,6 +50,35 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   const today = new Date().toISOString().split('T')[0]
 
+  const { data: activeRows } = await db
+    .from('events')
+    .select('category_id')
+    .eq('status', 'published')
+    .or(`ends_at.is.null,ends_at.gte.${today},is_ongoing.eq.true`)
+
+  const categoryCounts = new Map<string, number>()
+  for (const row of (activeRows ?? []) as { category_id: string | null }[]) {
+    if (!row.category_id) continue
+    categoryCounts.set(row.category_id, (categoryCounts.get(row.category_id) ?? 0) + 1)
+  }
+  const allCatsWithCount = (allCats ?? []).map(c => ({ ...c, count: categoryCounts.get(c.id) ?? 0 }))
+
+  const { data: regionRows } = await db
+    .from('events')
+    .select('regions')
+    .eq('status', 'published')
+    .eq('category_id', category.id)
+    .or(`ends_at.is.null,ends_at.gte.${today},is_ongoing.eq.true`)
+
+  const regionSet = new Set<string>()
+  for (const row of (regionRows ?? []) as { regions: string[] | null }[]) {
+    for (const r of row.regions ?? []) {
+      const trimmed = r?.trim()
+      if (trimmed) regionSet.add(trimmed)
+    }
+  }
+  const categoryRegions = Array.from(regionSet)
+
   let query = db
     .from('events')
     .select(`
@@ -89,10 +118,17 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
-      <CategoryNav categories={allCats ?? []} activeCategorySlug={slug} />
+      <CategoryNav categories={allCatsWithCount} activeCategorySlug={slug} />
 
       <div className="flex items-center justify-between mt-6 mb-4 flex-wrap gap-2">
-        <h1 className="text-xl font-bold">{category.name}</h1>
+        <div>
+          <h1 className="text-xl font-bold">{category.name}</h1>
+          {categoryRegions.length > 0 && (
+            <p className="text-xs mt-1" style={{ color: 'var(--muted-fg)' }}>
+              지역: {categoryRegions.join(', ')}
+            </p>
+          )}
+        </div>
         <div className="flex gap-2">
           {(['newest', 'deadline', 'upcoming'] as SortOption[]).map(s => (
             <a

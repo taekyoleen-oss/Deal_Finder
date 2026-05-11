@@ -20,7 +20,7 @@ export default async function HomePage({
 
   const today = new Date().toISOString().split('T')[0]
 
-  let allCats: Category[] = []
+  let allCats: (Category & { count?: number })[] = []
   let initialEvents: EventWithRelations[] = []
 
   try {
@@ -32,7 +32,20 @@ export default async function HomePage({
       .is('parent_id', null)
       .eq('is_active', true)
       .order('display_order')
-    allCats = (cats ?? []) as Category[]
+
+    const { data: activeRows } = await db
+      .from('events')
+      .select('category_id')
+      .eq('status', 'published')
+      .or(`ends_at.is.null,ends_at.gte.${today},is_ongoing.eq.true`)
+
+    const counts = new Map<string, number>()
+    for (const row of (activeRows ?? []) as { category_id: string | null }[]) {
+      if (!row.category_id) continue
+      counts.set(row.category_id, (counts.get(row.category_id) ?? 0) + 1)
+    }
+
+    allCats = ((cats ?? []) as Category[]).map(c => ({ ...c, count: counts.get(c.id) ?? 0 }))
 
     let query = db
       .from('events')
