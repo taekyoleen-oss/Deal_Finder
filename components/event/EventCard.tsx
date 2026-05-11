@@ -86,7 +86,7 @@ export function EventCard({ event }: Props) {
         <Link
           href={`/event/${event.id}`}
           onClick={handleClick}
-          className="block font-semibold text-sm leading-snug mb-2 hover:underline line-clamp-2"
+          className="block font-semibold text-base leading-snug mb-2 hover:underline line-clamp-2"
           style={{ color: 'var(--foreground)' }}
         >
           {event.title}
@@ -103,7 +103,7 @@ export function EventCard({ event }: Props) {
         {/* Summary */}
         {event.summary && (
           <p
-            className="text-xs line-clamp-2 mb-3"
+            className="text-sm line-clamp-2 mb-3"
             style={{ color: 'var(--muted-fg)' }}
           >
             {event.summary}
@@ -112,11 +112,11 @@ export function EventCard({ event }: Props) {
 
         {/* Key points */}
         {event.key_points && event.key_points.length > 0 && (
-          <ul className="space-y-0.5 mb-3">
+          <ul className="space-y-1 mb-3">
             {event.key_points.slice(0, 3).map((point, i) => (
               <li
                 key={i}
-                className="text-xs flex gap-1.5"
+                className="text-sm flex gap-1.5"
                 style={{ color: 'var(--foreground)' }}
               >
                 <span style={{ color: 'var(--primary)' }}>•</span>

@@ -30,7 +30,7 @@ export function EventCardImage({ src, source, categorySlug, categoryName, alt, e
   if (!src || failed) {
     return (
       <div
-        className="w-full h-24 flex items-center justify-center text-white text-xs font-medium rounded-t-[var(--radius)]"
+        className="w-full h-12 flex items-center justify-center text-white text-base font-semibold rounded-t-[var(--radius)]"
         style={{ backgroundColor: bgColor }}
         aria-hidden
       >
@@ -40,7 +40,7 @@ export function EventCardImage({ src, source, categorySlug, categoryName, alt, e
   }
 
   return (
-    <div className="relative w-full h-24 overflow-hidden rounded-t-[var(--radius)]">
+    <div className="relative w-full h-12 overflow-hidden rounded-t-[var(--radius)]">
       <Image
         src={src}
         alt={alt}
